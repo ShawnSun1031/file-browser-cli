@@ -4,8 +4,6 @@ This module provides a CLI interface for file operations using Typer.
 It includes commands for creating new files with a file browser interface.
 """
 
-import asyncio
-from functools import wraps
 import logging
 from pathlib import Path
 from typing import Optional
@@ -18,14 +16,6 @@ from file_browser import DirectoryTreeApp
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-
-# https://github.com/pallets/click/issues/85#issuecomment-503464628
-def coro(f):
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        return asyncio.run(f(*args, **kwargs))
-
-    return wrapper
 
 # Create Typer apps
 app = Typer(help="File operations CLI")
@@ -65,16 +55,16 @@ class FileCreator:
             raise
 
 
-async def get_selected_path() -> Optional[Path]:
+def get_selected_path() -> Optional[Path]:
     """Get the selected path from the file browser.
 
     Returns:
         Optional[Path]: The selected path or None if no path was selected.
     """
-    
+
     try:
         browser_app = DirectoryTreeApp()
-        await browser_app.run_async()
+        browser_app.run()
     except:
         # Handle the exit from the file browser
         pass
@@ -82,14 +72,13 @@ async def get_selected_path() -> Optional[Path]:
 
 
 @code_app.command("create")
-@coro
-async def create_code() -> None:
+def create_code() -> None:
     """Create a new code file with file browser selection.
 
     This command opens a file browser interface to select a location
     for the new file. The file will be created at the selected location.
     """
-    selected_path = await get_selected_path()
+    selected_path = get_selected_path()
     logger.debug(f"Selected path from browser: {selected_path}")
 
     if not selected_path:

@@ -62,12 +62,9 @@ def get_selected_path() -> Optional[Path]:
         Optional[Path]: The selected path or None if no path was selected.
     """
 
-    try:
-        browser_app = DirectoryTreeApp()
-        browser_app.run()
-    except:
-        # Handle the exit from the file browser
-        pass
+    browser_app = DirectoryTreeApp()
+    browser_app.run()
+
     return browser_app.selected_path
 
 

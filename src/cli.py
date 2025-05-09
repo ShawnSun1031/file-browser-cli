@@ -1,0 +1,114 @@
+"""Command-line interface for file operations.
+
+This module provides a CLI interface for file operations using Typer.
+It includes commands for creating new files with a file browser interface.
+"""
+
+import asyncio
+from functools import wraps
+import logging
+from pathlib import Path
+from typing import Optional
+
+import typer
+from typer import Typer
+
+from file_browser import DirectoryTreeApp
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+# https://github.com/pallets/click/issues/85#issuecomment-503464628
+def coro(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        return asyncio.run(f(*args, **kwargs))
+
+    return wrapper
+
+# Create Typer apps
+app = Typer(help="File operations CLI")
+code_app = Typer(help="Code file operations")
+app.add_typer(code_app, name="code")
+
+
+class FileCreator:
+    """Handles file creation operations."""
+
+    def __init__(self, browser_app: DirectoryTreeApp):
+        """Initialize the file creator.
+
+        Args:
+            browser_app: The file browser application instance.
+        """
+        self.browser_app = browser_app
+
+    def create_file(self, path: Path) -> None:
+        """Create a new file at the specified path.
+
+        Args:
+            path: The path where the file should be created.
+
+        Raises:
+            Exception: If file creation fails.
+        """
+        try:
+            # Ensure the parent directory exists
+            path.parent.mkdir(parents=True, exist_ok=True)
+            # Create the file
+            path.touch()
+            typer.echo(f"Created new file: {path}")
+        except Exception as e:
+            logger.error(f"Error creating file: {e}")
+            typer.echo(f"Error creating file: {e}", err=True)
+            raise
+
+
+async def get_selected_path() -> Optional[Path]:
+    """Get the selected path from the file browser.
+
+    Returns:
+        Optional[Path]: The selected path or None if no path was selected.
+    """
+    
+    try:
+        browser_app = DirectoryTreeApp()
+        await browser_app.run_async()
+    except:
+        # Handle the exit from the file browser
+        pass
+    return browser_app.selected_path
+
+
+@code_app.command("create")
+@coro
+async def create_code() -> None:
+    """Create a new code file with file browser selection.
+
+    This command opens a file browser interface to select a location
+    for the new file. The file will be created at the selected location.
+    """
+    selected_path = await get_selected_path()
+    logger.debug(f"Selected path from browser: {selected_path}")
+
+    if not selected_path:
+        logger.error("No file was selected")
+        typer.echo("No file was selected.")
+        return
+
+    file_creator = FileCreator(DirectoryTreeApp())
+    try:
+        file_creator.create_file(selected_path)
+    except Exception:
+        # Error is already logged and echoed in create_file
+        pass
+
+
+def main() -> None:
+    """Run the CLI application."""
+    app()
+
+
+if __name__ == "__main__":
+    main()

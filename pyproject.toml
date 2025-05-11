@@ -1,6 +1,6 @@
 [project]
 name = "file-browser-cli"
-version = "0.1.0"
+version = "0.1.1pre4"
 description = "一個基於 Typer 與 Textual 的互動式檔案瀏覽與建立工具，支援 CLI 檔案選擇與自動建立新檔案。"
 readme = "README.md"
 requires-python = ">=3.9"

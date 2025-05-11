@@ -38,4 +38,4 @@ jobs:
     - name: Test with pytest
       run: |
         uv sync --locked --all-extras
-        PYTHONPATH="src" .venv/bin/activate pytest
+        PYTHONPATH="src" uv run pytest

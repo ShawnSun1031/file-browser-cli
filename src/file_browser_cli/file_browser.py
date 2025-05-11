@@ -57,15 +57,33 @@ class CustomDirectoryTree(DirectoryTree):
 
     def action_expand(self) -> None:
         """Expand the current node if it's a directory."""
-        if self.cursor_node and not self.cursor_node.is_expanded:
-            self.cursor_node.expand()
-            self.refresh()
+        if self.cursor_node:
+            if not self.cursor_node.is_expanded:
+                self.cursor_node.expand()
+                self.refresh()
+            else:
+                # if expanded, change root path to the current node
+                self.path = Path(self.cursor_node.data.path)
+                self.refresh()
 
     def action_collapse(self) -> None:
-        """Collapse the current node if it's a directory."""
-        if self.cursor_node and self.cursor_node.is_expanded:
-            self.cursor_node.collapse()
-            self.refresh()
+        """Collapse the current node if it's a directory.
+        如果目前在 root，則切換到 root 的 parent。
+        """
+        if self.cursor_node:
+            if self.cursor_node.is_expanded:
+                self.cursor_node.collapse()
+                self.refresh()
+            # self.action_page_down()
+            # self.move_cursor_to_line(2, animate=True)
+            # 如果目前在 root 節點
+            if self.cursor_node.parent is None:
+                # 取得目前 root 路徑
+                current_root = Path(self.path)
+                parent_root = current_root.parent
+                # 如果還有上層目錄就切換
+                if parent_root != current_root:
+                    self.path = str(parent_root)
 
 
 class DirectoryTreeApp(App):
@@ -81,7 +99,7 @@ class DirectoryTreeApp(App):
         self.selected_path = None
 
     def compose(self) -> ComposeResult:
-        yield CustomDirectoryTree("./")
+        yield CustomDirectoryTree(os.getcwd())
 
     def action_select_path(self) -> None:
         """Handle path selection."""

@@ -11,7 +11,7 @@ from typing import Optional
 import typer
 from typer import Typer
 
-from file_browser import DirectoryTreeApp
+from file_browser_cli.file_browser import DirectoryTreeApp
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -91,10 +91,13 @@ def create_code() -> None:
         pass
 
 
-def main() -> None:
-    """Run the CLI application."""
-    app()
+@app.callback(invoke_without_command=True)
+def main():
+    """
+    Manage users in the awesome CLI app.
+    """
+    create_code()
 
 
 if __name__ == "__main__":
-    main()
+    app()

@@ -18,13 +18,13 @@ pip install file-browser-cli
 ## 使用方式
 
 ```bash
-browser-cli code create
+browser-cli
 ```
 
 或
 
 ```bash
-python -m file_browser_cli.cli code create
+python -m file_browser_cli.cli
 ```
 
 ## 依賴

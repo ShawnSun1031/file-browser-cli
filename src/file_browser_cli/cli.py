@@ -65,7 +65,7 @@ def get_selected_path() -> Optional[Path]:
     browser_app = DirectoryTreeApp()
     browser_app.run()
 
-    return browser_app.selected_path
+    return browser_app.selected_paths
 
 
 @code_app.command("create")
@@ -75,17 +75,20 @@ def create_code() -> None:
     This command opens a file browser interface to select a location
     for the new file. The file will be created at the selected location.
     """
-    selected_path = get_selected_path()
-    logger.debug(f"Selected path from browser: {selected_path}")
+    selected_paths = get_selected_path()
+    logger.debug(f"Selected path from browser: {selected_paths}")
+    print(selected_paths)
+    # raise ValueError(f"Test error {selected_paths}")
 
-    if not selected_path:
+    if len(selected_paths) == 0:
         logger.error("No file was selected")
         typer.echo("No file was selected.")
         return
 
     file_creator = FileCreator(DirectoryTreeApp())
     try:
-        file_creator.create_file(selected_path)
+        for selected_path in selected_paths:
+            file_creator.create_file(selected_path)
     except Exception:
         # Error is already logged and echoed in create_file
         pass
